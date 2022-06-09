@@ -1,0 +1,252 @@
+---
+title: " Programacion R grupo GJJAB"
+author: 
+  - name: Baptiste Caillé
+    email: baptiste.caille.move@gmail.com
+    affiliation: Facultad de ingenieria Universidad Nacional de Cuyo
+    correspondingauthor: true
+  - name: Gastón Barmat
+    email: gastonbarmat@gmail.com
+    affiliation: Facultad de ingenieria Universidad Nacional de Cuyo
+  - name: Juan Ignacio Gutiérrez Glielmi
+    email: juangglielmi@hotmail.com
+    affiliation: Facultad de ingenieria Universidad Nacional de Cuyo
+  - name: Jacinta Calle Monzo
+    email: jacicalle@hotmail.com
+    affiliation: Facultad de ingenieria Universidad Nacional de Cuyo
+  - name: Agustina Salvarredi
+    email: agusalvarredi@gmail.com
+    affiliation: Facultad de ingenieria Universidad Nacional de Cuyo
+address:
+  - code: Facultad de ingenieria Universidad Nacional de Cuyo
+    address: "Facultad de ingenieria Universidad Nacional de Cuyo - Centro Universitario Edifico 6, M5502KAF"
+abstract: |
+  This is the abstract.
+
+  It consists of two paragraphs.
+keywords: 
+  - keyword1
+  - keyword2
+date: "`r Sys.Date()`"
+classoption: preprint, 3p, authoryear
+bibliography: mybibfile.bib
+linenumbers: false
+numbersections: true
+# Use a CSL with `citation_package = "default"`
+# csl: https://www.zotero.org/styles/elsevier-harvard
+output: 
+  rticles::elsevier_article:
+    keep_tex: true
+    citation_package: natbib
+---
+# Generar un vector secuencia
+
+## *for*
+
+```{r}
+A <- vector()
+for(i in 0:50000){
+  A[i+1] <- i*2
+}
+tail(A)
+head(A)
+```
+## *seq*
+
+```{r}
+B <- vector()
+B<- seq(0,100000,2)
+tail(B)
+head(B)
+```
+
+## Performance
+
+uso del algoritmo *Biblioteca tictoc*
+*"In general, calls to tic and toc start the timer when the tic call is made and stop the timer when the toc call is made, recording the elapsed time between the calls from proc.time."*
+
+```{r}
+library(tictoc)
+A <- vector()
+B <- vector()
+
+tic.clearlog()
+
+tic
+for(C in 0:50000){
+  A[C+1] <- C*2
+}
+toc(log = TRUE, quiet = TRUE)
+
+tic
+B <- seq(0,100000,2)
+toc(log = TRUE, quiet = TRUE)
+
+unlist(tic.log())
+
+```
+# Serie de Fibonacci
+
+
+```{r}
+w <- vector()
+w[1]<- 0
+w[2]<- 1
+for(var in 0:15)
+{ 
+  w[var+3] <- w[var+2]+w[var+1]
+}
+head(w)
+```
+
+## Performance
+
+uso del algoritmo  *Biblioteca rbenchmark*.
+
+*"The library consists of just one function, benchmark, which is a simple wrapper around system.time. Given a specification of the benchmarking process (counts of replications, evaluation environment) and an arbitrary number of expressions, benchmark evaluates each of the expressions in the specified environment, replicating the evaluation as many times as specified, and returning the results conveniently wrapped into a data frame"*
+
+```{r}
+library(rbenchmark)
+
+k <- vector()
+w <- vector()
+
+w = function(it){
+  k[1] <- 0
+  k[2] <- 1
+  for(i in 0:it){
+    k[i+3] <- (k[i+2]+k[i+1])
+  }
+  return(k)
+}
+
+
+it=197
+benchmark(w(it), replications = 1000)
+```
+
+-  *elapsed*: tiempo acumulado 
+-  *relative*: razon con la prueba mas rapida.
+-  *user.self*: CPU time spent by the current process
+-  *sys.self*: CPU time spent by the kernel (the operating system) on behalf of the current process.
+# Algoritmo para la pesadilla de Gauss
+```{r}
+for(i in 0:5)
+{ a<-i
+b <-i+1
+c <- a+b
+
+print(c)
+}
+```
+
+# Ordenacion de un vector por Metodo Burbuja
+
+A continuacion estan las lineas de codigo para ordenar, de mayor a menor, por metodo bubble un vector de 150 numeros elegidos aleatoriamente entre el 1 y el 1000000:
+
+```{r}
+example <- sample(1:1000000,150)
+
+head(example)
+tail(example)
+
+bubble = function(example){
+  n <- length(example)
+  for(i in 1:(n-1)){
+    for(j in 1:(n-i)){
+      if (example[j] < example[j+1]){
+        temporal <- example[j]
+        example[j] <- example[j+1]
+        example[j+1] <- temporal
+      }
+    }
+  }
+  return(example)
+}
+
+example_ordenada <- bubble(example)
+
+head(example_ordenada)
+tail(example_ordenada)
+```
+
+
+## Performance
+
+uso del algoritmo *Biblioteca Microbenchmark*.
+
+*"Microbenchmark serves as a more accurate replacement of the often seen system.time(replicate(1000, expr)) expression. It tries hard to accurately measure only the time it takes to evaluate expr. To achieved this, the sub-millisecond (supposedly nanosecond) accurate timing functions most modern operating systems provide are used."*
+
+A continuacion vemos las lineas de codigo para calcular el tiempo de ejecucion de el codigo para ordenar por metodo bubble. Tomaremos una muestra de 2000 numeros entre el 1 y el 1000000 Lo compararemos con el comando *sort* de R:
+
+```{r}
+library(microbenchmark)
+
+example <- sample(1:1000000,2000)
+
+bubble = function(example){
+  n <- length(example)
+  for(i in 1:(n-1)){
+    for(j in 1:(n-i)){
+      if (example[j] < example[j+1]){
+        temporal <- example[j]
+        example[j] <- example[j+1]
+        example[j+1] <- temporal
+      }
+    }
+  }
+  return(example)
+}
+
+
+microbenchmark(bubble(example),sort(example), times=5)
+
+library(ggplot2)
+autoplot(microbenchmark(bubble(example),sort(example), times=5))
+autoplot(microbenchmark(bubble(example),times=5))
+autoplot(microbenchmark(sort(example),times=5))
+```
+# Progresión geométrica del COVid-19
+## Modelado matemático de una epidema
+```{r}
+library(readr)
+location <- getwd()
+setwd(location)
+casos_A <- read_delim("casos.csv", ";", escape_double = FALSE, trim_ws = TRUE, skip = 1)
+#Estadística de casos
+summary(casos_A$Casos)
+m <- length(casos_A$Casos)
+F <- (casos_A$Casos[2:m])/(casos_A$Casos[1:m-1])
+#Estadísticos de F
+mean(F,na.rm = TRUE)
+sd(F,na.rm = TRUE)
+var(F,na.rm = TRUE)
+#Grafico de casos
+plot(casos_A$Casos[2:m]);(casos_A$Casos[1:m-1])
+```
+## Accediendo a los datos actualizados del Covid-19 
+
+```{r}
+library(readr)
+location <- getwd()
+setwd(location)
+casos_B <- read.csv("time_series_covid19_confirmed_global.csv",header = TRUE, sep = ",", dec=".")
+#en nustro caso la base de dato esta muy grande, como una matriz y no un vector, 
+#asi no se puede utilizar la funcion which.max
+# definimos aca los dos variables que necessitamos por la determincaion del modelo
+epidemia=4520
+fecha <- as.Date(c("01/01/22"),  format = "%m/%d/%y")
+head(fecha)
+```
+
+
+```{r}
+#determinacion en que fecha se contagiaran 40 millones de personas
+library(lubridate)
+F=1.62
+while (epidemia<40000000) {
+fecha=fecha+ days(1)
+epidemia=epidemia*F
+}
+"fecha se contagiaran 40 millones de personas:"
+head(fecha)
